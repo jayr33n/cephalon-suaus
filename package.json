@@ -11,7 +11,8 @@
     "eslint": "^8.35.0"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node .",
+    "deploy": "node src/deploy-commands.js"
   },
   "repository": {
     "type": "git",
