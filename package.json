@@ -1,7 +1,8 @@
 {
   "dependencies": {
     "discord.js": "^14.7.1",
-    "dotenv": "^16.0.3"
+    "dotenv": "^16.0.3",
+    "undici": "^5.20.0"
   },
   "name": "cephalon-suaus",
   "description": "",
@@ -12,6 +13,7 @@
   },
   "scripts": {
     "start": "node .",
+    "debug": "node --inspect .",
     "deploy": "node src/deploy-commands.js"
   },
   "repository": {
