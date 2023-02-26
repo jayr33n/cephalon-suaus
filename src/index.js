@@ -19,11 +19,12 @@ client.on(Events.InteractionCreate, async interaction => {
     try {
         await command.execute(interaction);
     } catch (error) {
-        console.log(error)
-        await interaction.reply({
-            content: '\`\`\`diff\n-:(\n\`\`\`',
-            ephemeral: true
-        });
+        console.error(error)
+        const content = {content: '\`:(\`', ephemeral: true};
+        if (interaction.replied || interaction.deferred)
+            await interaction.followUp(content);
+        else
+            await interaction.reply(content);
     }
 });
 
