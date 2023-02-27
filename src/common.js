@@ -12,4 +12,8 @@ function loadCommands() {
     return commands;
 }
 
-module.exports = {loadCommands}
+function emptyIfUndefined(value) {
+    return !value ? ' ' : value;
+}
+
+module.exports = {loadCommands, emptyIfUndefined}

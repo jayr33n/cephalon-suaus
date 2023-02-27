@@ -20,7 +20,9 @@ client.on(Events.InteractionCreate, async interaction => {
         await command.execute(interaction);
     } catch (error) {
         console.error(error)
-        const content = {content: '\`:(\`', ephemeral: true};
+        const content = !error.message ?
+            {content: '\`:(\`', ephemeral: true} :
+            {content: `\`${error.message}\``, ephemeral: true};
         if (interaction.replied || interaction.deferred)
             await interaction.followUp(content);
         else
