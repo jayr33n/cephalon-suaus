@@ -1,11 +1,12 @@
 const {SlashCommandBuilder, EmbedBuilder} = require('discord.js');
-const {requestItem} = require("../api");
+const {requestItem} = require("../stats/stats-api");
 const {emptyIfUndefined} = require("../common");
+const {findMarketItem} = require("../market/lookup");
 
 function getComponentsOptions() {
     return element => {
         return {
-            name: `x${element.itemCount} ${element.name}`,
+            name: `- - - - - - - - - - - - - -\nx${element.itemCount} ${element.name}`,
             value: element.name === 'Blueprint' ? ' ' : element.description,
             inline: element.name !== 'Orokin Cell'
         }
@@ -16,7 +17,7 @@ function getDropsOptions() {
     return element => {
         return {
             name: `**${element.location}**`,
-            value: `${(getDropChance(element))}% ${element.type}`,
+            value: `${element.type} (${element.rarity})`,
             inline: true
         }
     };
@@ -32,12 +33,28 @@ function getLevelStatsOptions() {
     };
 }
 
+function getOrdersOptions() {
+    return element => {
+        return {
+            name: `🎮 **x${element.quantity}** for **${element.platinum}p ${getModRank(element.mod_rank)}**`,
+            value: `\`/w ${element.user.ingame_name}\``,
+            inline: true
+        }
+    };
+}
+
+function getModRank(modRank) {
+    if (modRank === 0)
+        return '(Rank 0)';
+    return modRank ? `(Rank ${modRank})` : '';
+}
+
 function getMastery(mastery) {
     return mastery ? `${mastery}M` : '';
 }
 
-function getIsAvailableIcon(item) {
-    return item.tradable ? '✔️' : '❌';
+function getIsAvailableIcon(vaulted) {
+    return vaulted === false ? '✔️' : '❌';
 }
 
 function getDropChance(element) {
@@ -61,15 +78,16 @@ function shortenMergedFields(fields, title) {
         .map(field => field.replace('Level', 'Lvl'))
         .map(field => field.replace(' (Defense)', ''))
         .map(field => field.replace(',', ''))
-        .map(field => field.replace('<DT_SENTIENT>', ''))
+        .map(field => field.replace('<DT_SENTIENT>', '(Sentient)'))
+        .map(field => field.replace('<DT_SLASH>', '(Slash)'))
         .join('\n');
     if (merged.length > 1000) {
-        return merged.slice(0, 1000) + ' **...**';
+        return merged.slice(0, 1000) + '...';
     }
     return merged;
 }
 
-function embedArray(title, embed, array, options, distinct) {
+function embedArray(title, embed, array, options, distinct, mergedTitle) {
     if (!array || array.length === 0) {
         return;
     }
@@ -87,7 +105,7 @@ function embedArray(title, embed, array, options, distinct) {
     }
     if (!distinct) {
         const merged = shortenMergedFields(fields, title);
-        embed.addFields({name: ' ', value: merged, inline: false})
+        embed.addFields({name: emptyIfUndefined(mergedTitle), value: merged, inline: false});
     }
 }
 
@@ -96,22 +114,38 @@ function getBaseDescription(item) {
 }
 
 function getModDescription(item) {
-    return `**${item.type} ${emptyIfUndefined(item.baseDrain)} - ${emptyIfUndefined(item.fusionLimit)} ${emptyIfUndefined(item.polarity).toUpperCase()} **`;
+    return `**${item.type} ${emptyIfUndefined(item.polarity).toUpperCase()} **`;
 }
 
 function embedItem(item) {
     const embed = new EmbedBuilder()
         .setColor(0x0099FF)
-        .setTitle(item.name)
+        .setTitle(`📖 ${item.name}`)
         .setURL(item.wikiaUrl)
         .setDescription(item.category === 'Mods' ? getModDescription(item) : getBaseDescription(item))
-        .setThumbnail(item.wikiaThumbnail)
+        .setThumbnail(item.wikiaThumbnail);
     if (emptyIfUndefined(item.description) !== ' ')
-        embed.addFields({name: 'Description', value: item.description})
-    embed.addFields({name: `Available    ${getIsAvailableIcon(item)}`, value: ' '});
+        embed.addFields({name: 'Description', value: item.description});
     embedArray(item.name, embed, item.levelStats, getLevelStatsOptions(), false);
     embedArray(item.name, embed, item.drops, getDropsOptions(), false);
     embedArray(item.name, embed, item.components, getComponentsOptions(), true);
+    return embed;
+}
+
+function embedMarketItem(marketItem) {
+    const embed = new EmbedBuilder()
+        .setColor(0x0099FF)
+        .setTitle(`📖 ${marketItem.name}`)
+        .setURL(marketItem.marketUrl);
+    if (emptyIfUndefined(marketItem.vaulted) !== ' ')
+        embed.addFields({name: `Available    ${getIsAvailableIcon(marketItem.vaulted)}`, value: ' '});
+    embedArray(
+        marketItem.name,
+        embed,
+        marketItem.orders.slice(0, 10),
+        getOrdersOptions(),
+        false,
+        `📈 Orders (Top 10)`);
     return embed;
 }
 
@@ -127,7 +161,14 @@ module.exports = {
         await interaction.deferReply();
         const argument = interaction.options.getString('search');
         const item = await requestItem(argument);
-        const embedded = embedItem(item);
-        await interaction.editReply({embeds: [embedded]});
+        const embeddedItem = embedItem(item);
+        await interaction.editReply({embeds: [embeddedItem]});
+        await interaction.followUp({content: `⚙️ Searching for \`${item.name}\` orders on the warframe market...`})
+        findMarketItem(item.name).then(
+            marketItem => {
+                const embeddedMarketItem = embedMarketItem(marketItem);
+                interaction.followUp({embeds: [embeddedMarketItem]});
+            },
+            error => interaction.followUp({content: `${error.message}`}));
     },
 };

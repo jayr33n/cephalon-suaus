@@ -1,10 +1,10 @@
 const config = {
-    warframe: {
-        api: {
-            url: {
-                items: 'https://api.warframestat.us/items/search/',
-                frames: 'https://api.warframestat.us/warframes/search/'
-            }
+    api: {
+        stats: {
+            items: 'https://api.warframestat.us/items/search/'
+        },
+        market: {
+            items: 'https://api.warframe.market/v1/items/'
         }
     },
     source: {

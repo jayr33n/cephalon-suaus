@@ -1,6 +1,6 @@
-const env = require('dotenv').config()
+require('dotenv').config();
 const {REST, Routes} = require('discord.js');
-const {loadCommands} = require("./common");
+const {loadCommands} = require("../src/common");
 
 const commandsJson = []
 const commands = loadCommands();

@@ -14,7 +14,7 @@
   "scripts": {
     "start": "node .",
     "debug": "node --inspect .",
-    "deploy": "node src/deploy-commands.js"
+    "deploy": "node scripts/deploy-commands.js"
   },
   "repository": {
     "type": "git",

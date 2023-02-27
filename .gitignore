@@ -229,4 +229,6 @@ dist
 # SvelteKit build / generate output
 .svelte-kit
 
+vendor/warframe_market_lookups.json
+
 # End of https://www.toptal.com/developers/gitignore/api/node,intellij+all
