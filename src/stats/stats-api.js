@@ -25,7 +25,7 @@ async function requestItem(item) {
         });
     if (filtered.length === 0) {
         if (content.length === 0)
-            throw new Error(`❌ \`${item}\` is not a valid item`);
+            throw new Error(`\`${item}\` is not a valid item`);
         return content[0];
     }
     return filtered[0];

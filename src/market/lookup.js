@@ -18,11 +18,15 @@ function lookupItem(itemName) {
 async function findMarketItem(itemName) {
     const lookup = lookupItem(itemName);
     if (!lookup)
-        throw new Error(`❌ Could not find \`${itemName}\` on the warframe market`);
+        throw new Error(`Could not find \`${itemName}\` on the warframe market`);
     const item = await requestMarketItem(lookup.url_name);
     item.vaulted = lookup.vaulted;
     item.name = lookup.item_name;
     return item;
 }
 
-module.exports = {findMarketItem};
+function findItem(relicName) {
+    return lookupItem(relicName);
+}
+
+module.exports = {findMarketItem, findItem};

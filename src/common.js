@@ -16,4 +16,8 @@ function emptyIfUndefined(value) {
     return !value ? ' ' : value;
 }
 
-module.exports = {loadCommands, emptyIfUndefined}
+function log(message) {
+    console.log(`[${new Date().toISOString()}] ${message}`);
+}
+
+module.exports = {loadCommands, emptyIfUndefined, log}

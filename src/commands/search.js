@@ -1,7 +1,7 @@
 const {SlashCommandBuilder, EmbedBuilder} = require('discord.js');
 const {requestItem} = require("../stats/stats-api");
-const {emptyIfUndefined} = require("../common");
-const {findMarketItem} = require("../market/lookup");
+const {emptyIfUndefined, log} = require("../common");
+const {findMarketItem, findItem} = require("../market/lookup");
 
 function getComponentsOptions() {
     return element => {
@@ -169,12 +169,16 @@ module.exports = {
     async execute(interaction) {
         await interaction.deferReply();
         const argument = interaction.options.getString('search');
+        log(`Requesting stats for (${argument}) from (${interaction.user.tag})...`);
         const item = await requestItem(argument);
+        log(`Stats found for (${argument}): ${JSON.stringify(item).length} characters`);
         const embeddedItem = embedItem(item);
         await interaction.editReply({embeds: [embeddedItem]});
+        log(`Requesting orders for (${argument}) from (${interaction.user.tag})...`);
         await interaction.followUp({content: `⚙️ Searching for \`${item.name}\` orders on the warframe market...`})
         findMarketItem(item.name).then(
             marketItem => {
+                log(`Orders found for (${argument}): ${JSON.stringify(marketItem).length} characters`);
                 const embeddedMarketItem = embedMarketItem(marketItem);
                 interaction.followUp({embeds: [embeddedMarketItem]});
             },
