@@ -15,9 +15,18 @@ function getComponentsOptions() {
 
 function getDropsOptions() {
     return element => {
+        if (element.location.includes("Relic")) {
+            const relicItem = findItem(element.location);
+            if (relicItem !== undefined)
+                return {
+                    name: `**${element.location}**`,
+                    value: `${element.type} (${element.rarity}) ${relicItem.vaulted ? '(Vaulted)' : '(Available)'}`,
+                    inline: true
+                }
+        }
         return {
             name: `**${element.location}**`,
-            value: `${element.type} (${element.rarity})`,
+            value: `${element.type} (${getDropChance(element)}%)`,
             inline: true
         }
     };
