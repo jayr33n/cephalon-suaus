@@ -1,0 +1,6 @@
+services:
+  cephalon-suaus:
+    build:
+      dockerfile: Dockerfile
+    container_name: cephalon-suaus
+    image: cephalon-suaus:latest
