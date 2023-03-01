@@ -1,5 +1,6 @@
 const {requestMarketItem} = require("./market-api");
 const lookups = require('../../vendor/warframe_market_lookups.json').payload.items;
+const marketAssetsUrl = require('../config.js').api.market.assets;
 
 function lookupItem(itemName) {
     const exactMatch = lookups
@@ -22,11 +23,14 @@ async function findMarketItem(itemName) {
     const item = await requestMarketItem(lookup.url_name);
     item.vaulted = lookup.vaulted;
     item.name = lookup.item_name;
+    item.imgUrl = getImageUrl(item);
     return item;
 }
 
-function findItem(relicName) {
-    return lookupItem(relicName);
+function getImageUrl(item) {
+    const last = item.items_in_set[item.items_in_set.length - 1];
+    const url = `${marketAssetsUrl}${last.icon}`;
+    return url;
 }
 
-module.exports = {findMarketItem, findItem};
+module.exports = {findMarketItem, lookupItem};

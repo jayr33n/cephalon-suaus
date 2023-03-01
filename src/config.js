@@ -4,7 +4,8 @@ const config = {
             items: 'https://api.warframestat.us/items/search/'
         },
         market: {
-            items: 'https://api.warframe.market/v1/items/'
+            items: 'https://api.warframe.market/v1/items/',
+            assets: 'https://warframe.market/static/assets/'
         }
     },
     source: {

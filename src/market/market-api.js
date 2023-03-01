@@ -1,6 +1,12 @@
 const {request} = require('undici');
 const itemsMarketUrl = require('../config.js').api.market.items;
 
+const statusPriorities = {
+    'ingame': 1,
+    'online': 2,
+    'offline': 3
+}
+
 async function requestMarketItem(urlName) {
     const url = `${itemsMarketUrl}${urlName}`;
     const response = await request(url);
@@ -24,13 +30,12 @@ async function requestOrders(url) {
     if (!orders)
         throw new Error(`No orders found for ${url}`);
     return orders
-        .filter(order => order.user.status === 'ingame')
         .filter(order => order.order_type === 'sell')
-        .map(order => {
-            order.ppq = order.platinum / order.quantity;
-            return order;
-        })
-        .sort((a, b) => a.platinum - b.platinum);
+        .sort((a, b) => {
+            if (a.user.status === b.user.status)
+                return a.platinum - b.platinum;
+            return statusPriorities[a.user.status] - statusPriorities[b.user.status];
+        });
 }
 
 module.exports = {requestMarketItem}

@@ -20,6 +20,15 @@ async function requestItem(item) {
         .filter(line => line.type !== 'Glyph')
         .filter(line => line.type !== 'Glyphs')
         .filter(line => line.type !== 'Note Packs')
+        .map(line => {
+            if (line.category !== "Relics")
+                return line;
+            line.name = line.name.replace(' Exceptional', '');
+            line.name = line.name.replace(' Intact', '');
+            line.name = line.name.replace(' Flawless', '');
+            line.name = line.name.replace(' Radiant', '');
+            return line;
+        })
         .filter(line => {
             return line.name.toLowerCase() === item.toLowerCase()
         });
